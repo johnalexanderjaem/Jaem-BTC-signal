@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover"/>
+<meta name="theme-color" content="#0a0a0f"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-title" content="JAEM"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<link rel="manifest" href="manifest.json"/>
+<link rel="icon" href="icon-192.png"/>
+<link rel="apple-touch-icon" href="icon-192.png"/>
+<title>JAEM — Trading Latino Signal</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0a0a0f;font-family:'Courier New',monospace;color:#e0e0e0;max-width:480px;margin:0 auto;min-height:100vh}
+#header{background:#0d0d1a;border-bottom:1px solid #1e1e3a;padding:12px 16px;display:flex;align-items:center;justify-content:space-between}
+#logo{font-size:13px;color:#6b6bff;letter-spacing:2px;font-weight:700}
+#status{font-size:10px;color:#444;margin-top:2px}
+#dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#555;margin-right:6px}
+#price-val{font-size:20px;font-weight:700;color:#fff;text-align:right}
+#price-chg{font-size:12px;text-align:right}
+#asset-tabs{display:flex;background:#0a0a14;border-bottom:1px solid #1e1e3a}
+.asset-tab{flex:1;padding:8px 0;font-size:12px;text-align:center;cursor:pointer;color:#555;font-weight:700;letter-spacing:1px;font-family:'Courier New',monospace;border-bottom:2px solid transparent}
+.asset-tab.active{color:#fff}
+.asset-tab.active.btc{border-bottom:2px solid #f7931a;color:#f7931a}
+.asset-tab.active.eth{border-bottom:2px solid #627eea;color:#627eea}
+#tabs{display:flex;background:#0d0d1a;border-bottom:1px solid #1e1e3a}
+.tab{flex:1;padding:10px 0;font-size:11px;text-align:center;cursor:pointer;color:#555;border-bottom:2px solid transparent;letter-spacing:1px;text-transform:uppercase;font-family:'Courier New',monospace}
+.tab.active{color:#6b6bff;border-bottom:2px solid #6b6bff}
+.page{display:none;padding:14px 16px}
+.page.active{display:block}
+#banner{border-radius:10px;padding:14px 16px;margin-bottom:14px;text-align:center;border:1px solid #222;background:rgba(255,255,255,0.04)}
+#signal-label{font-size:22px;font-weight:700;color:#444;letter-spacing:2px}
+#signal-sub{font-size:11px;color:#555;margin-top:6px}
+#tpsl-card{background:#0d0d1a;border:1px solid #1e1e3a;border-radius:10px;padding:14px;margin-bottom:14px;display:none}
+.tpsl-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #16162a;font-size:12px}
+.tpsl-row:last-child{border-bottom:none}
+.sec-title{font-size:10px;color:#555;letter-spacing:2px;text-transform:uppercase;margin-bottom:10px}
+#score-bars{display:flex;gap:8px;margin-bottom:14px}
+.score-side{flex:1}
+.score-label{font-size:10px;margin-bottom:4px}
+.score-bar{display:flex;gap:4px}
+.score-dot{flex:1;height:6px;border-radius:3px;background:#222}
+.filter-card{border-radius:8px;padding:10px 12px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,0.02);border:1px solid #1e1e3a}
+.filter-card.bull{background:rgba(0,255,136,0.05);border-color:#00ff8830}
+.filter-card.bear{background:rgba(255,59,92,0.05);border-color:#ff3b5c30}
+.filter-num{width:22px;height:22px;border-radius:50%;background:#222;color:#555;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.filter-num.bull{background:#00ff88;color:#000}
+.filter-num.bear{background:#ff3b5c;color:#000}
+.filter-label{font-size:11px;color:#999;margin-bottom:2px}
+.filter-value{font-size:12px;color:#ddd;font-weight:600}
+.filter-ico{font-size:16px}
+.notif-btn{background:#1e1e3a;border:1px solid #6b6bff;border-radius:8px;color:#6b6bff;padding:10px 16px;font-size:12px;cursor:pointer;width:100%;margin-bottom:12px;letter-spacing:1px;font-family:'Courier New',monospace}
+.test-btn{background:#1a1e1e;border:1px solid #00ff88;border-radius:8px;color:#00ff88;padding:10px 16px;font-size:12px;cursor:pointer;width:100%;margin-bottom:16px;letter-spacing:1px;font-family:'Courier New',monospace}
+.notif-ok{background:rgba(0,255,136,0.08);border:1px solid #00ff8840;border-radius:8px;padding:10px 12px;margin-bottom:12px;font-size:11px;color:#00ff88}
+.alert-item{border-radius:6px;padding:8px 10px;margin-bottom:8px;font-size:11px}
+.alert-item.buy{background:rgba(0,255,136,0.06);border-left:3px solid #00ff88}
+.alert-item.sell{background:rgba(255,59,92,0.06);border-left:3px solid #ff3b5c}
+.alert-time{color:#555;margin-bottom:2px}
+.alert-levels{display:flex;gap:10px;margin-top:6px;font-size:10px;color:#777;flex-wrap:wrap}
+.filter-info-card{background:#0d0d1a;border:1px solid #1e1e3a;border-radius:10px;padding:12px 14px;margin-bottom:10px}
+.filter-info-num{width:26px;height:26px;border-radius:50%;background:#6b6bff;color:#000;font-size:12px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;margin-right:10px;vertical-align:middle}
+.filter-info-name{font-size:13px;font-weight:700;color:#fff;display:inline;vertical-align:middle}
+.filter-info-desc{font-size:11px;color:#888;line-height:1.5;margin:8px 0 6px}
+.filter-info-tip{font-size:11px;color:#6b6bff;border-left:2px solid #6b6bff;padding-left:8px}
+#footer{text-align:center;padding:10px;font-size:10px;color:#2a2a3a}
+#no-alerts{color:#444;font-size:12px}
+.asset-badge{display:inline-block;font-size:9px;padding:2px 6px;border-radius:4px;margin-right:6px;font-weight:700}
+.asset-badge.BTC{background:#f7931a22;color:#f7931a}
+.asset-badge.ETH{background:#627eea22;color:#627eea}
+</style>
+</head>
+<body>
+
+<div id="header">
+  <div>
+    <div id="logo">JAEM</div>
+    <div id="status"><span id="dot"></span><span id="conn-text">Conectando...</span></div>
+  </div>
+  <div>
+    <div id="price-val">---</div>
+    <div id="price-chg" style="color:#555">0.00% 24h</div>
+  </div>
+</div>
+
+<div id="asset-tabs">
+  <div class="asset-tab active btc" id="asset-btc" onclick="switchAsset('BTC')">BTC BITCOIN</div>
+  <div class="asset-tab eth" id="asset-eth" onclick="switchAsset('ETH')">ETH ETHEREUM</div>
+</div>
+
+<div id="tabs">
+  <div class="tab active" onclick="showTab('dashboard')">Dashboard</div>
+  <div class="tab" onclick="showTab('filtros')">Filtros</div>
+  <div class="tab" onclick="showTab('alertas')">Alertas</div>
+</div>
+
+<div id="page-dashboard" class="page active">
+  <div id="banner">
+    <div style="font-size:10px;color:#666;margin-bottom:4px;letter-spacing:2px">SEÑAL ACTUAL — <span id="banner-asset">BTC</span></div>
+    <div id="signal-label">⏳ SIN SEÑAL</div>
+    <div id="signal-sub">Mínimo 5/7 para señal</div>
+  </div>
+
+  <div id="tpsl-card">
+    <div class="sec-title" id="tpsl-title">Niveles — ATR×1.5</div>
+    <div class="tpsl-row"><span style="color:#fff;font-weight:700;font-size:11px">ENTRADA</span><span id="tpsl-entry" style="color:#ddd;font-weight:600"></span></div>
+    <div class="tpsl-row"><span style="color:#00ff88;font-weight:700;font-size:11px">TP1 <span style="color:#555;font-size:10px">(40%)</span></span><span id="tpsl-tp1" style="color:#ddd;font-weight:600"></span></div>
+    <div class="tpsl-row"><span style="color:#00ff88;font-weight:700;font-size:11px">TP2 <span style="color:#555;font-size:10px">(35%)</span></span><span id="tpsl-tp2" style="color:#ddd;font-weight:600"></span></div>
+    <div class="tpsl-row"><span style="color:#00ff88;font-weight:700;font-size:11px">TP3 <span style="color:#555;font-size:10px">(25%)</span></span><span id="tpsl-tp3" style="color:#ddd;font-weight:600"></span></div>
+    <div class="tpsl-row" style="border-bottom:none"><span style="color:#ff3b5c;font-weight:700;font-size:11px">STOP LOSS</span><span id="tpsl-sl" style="color:#ddd;font-weight:600"></span></div>
+    <div style="font-size:9px;color:#444;margin-top:8px" id="tpsl-meta"></div>
+  </div>
+
+  <div class="sec-title">Filtros activos</div>
+  <div id="score-bars">
+    <div class="score-side">
+      <div class="score-label" style="color:#00ff88">COMPRA <span id="bull-count">0</span>/7</div>
+      <div class="score-bar" id="bull-bar"></div>
+    </div>
+    <div class="score-side">
+      <div class="score-label" style="color:#ff3b5c">VENTA <span id="bear-count">0</span>/7</div>
+      <div class="score-bar" id="bear-bar"></div>
+    </div>
+  </div>
+
+  <div class="sec-title">Resumen de filtros</div>
+  <div id="filters-list"><div style="color:#444;font-size:12px">Cargando datos...</div></div>
+</div>
+
+<div id="page-filtros" class="page">
+  <div class="sec-title">Los 7 filtros — Trading Latino</div>
+  <div id="filter-info-list"></div>
+</div>
+
+<div id="page-alertas" class="page">
+  <button class="notif-btn" id="notif-btn" onclick="requestNotif()">ACTIVAR NOTIFICACIONES PUSH</button>
+  <div class="notif-ok" id="notif-ok" style="display:none">Notificaciones activas — recibirás alertas cuando se cumplan 5+ filtros en BTC o ETH</div>
+  <button class="test-btn" onclick="testNotif()">ENVIAR NOTIFICACIÓN DE PRUEBA</button>
+  <div class="sec-title">Historial de señales</div>
+  <div id="alert-list"><div id="no-alerts">Sin señales aún. Monitoreando BTC y ETH...</div></div>
+</div>
+
+<div id="footer">JAEM · Trading Latino Method · BTC + ETH · 1H+15M</div>
+
+<script>
+var ASSETS = {
+  BTC: { symbol:'btcusdt', label:'BTC', price:null, priceChange:0, candles1h:[], candles15m:[], alertSentSignal:null },
+  ETH: { symbol:'ethusdt', label:'ETH', price:null, priceChange:0, candles1h:[], candles15m:[], alertSentSignal:null }
+};
+var activeAsset = 'BTC';
+var alerts = [];
+var ws = null;
+var MIN_FILTERS = 5, SL_MULT = 1.5;
+
+// Llave pública VAPID (es seguro que esté visible en el cliente; la privada
+// SOLO vive como variable de entorno en Netlify, nunca en este archivo).
+var VAPID_PUBLIC_KEY = 'BLeasI8ycLr33ZqD-ziFFIzgtLpk9PieYKZqlcSr99uyc7iEcU0514MUpQHxickLkfKP9yrU0JfskslN8--EPyc';
+
+// Registrar el Service Worker lo antes posible.
+// Es obligatorio en Chrome Android: ahí new Notification() está deshabilitado
+// y solo funciona registration.showNotification() vía Service Worker.
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('sw.js').catch(function(e){
+    console.error('No se pudo registrar el Service Worker:', e);
+  });
+}
+
+function urlBase64ToUint8Array(base64String) {
+  var padding = '='.repeat((4 - base64String.length % 4) % 4);
+  var base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+  var rawData = atob(base64);
+  var outputArray = new Uint8Array(rawData.length);
+  for (var i = 0; i < rawData.length; ++i) outputArray[i] = rawData.charCodeAt(i);
+  return outputArray;
+}
+
+// Suscribe este dispositivo a Web Push real y registra la suscripción en el
+// servidor (Netlify Function) para que check-signals.js le pueda notificar
+// aunque el navegador esté cerrado o el celular bloqueado.
+function subscribeUserToPush() {
+  if(!('serviceWorker' in navigator) || !('PushManager' in window)) return;
+  navigator.serviceWorker.ready.then(function(reg){
+    return reg.pushManager.getSubscription().then(function(existing){
+      if(existing) return existing;
+      return reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+      });
+    });
+  }).then(function(sub){
+    if(!sub) return;
+    return fetch('/.netlify/functions/subscribe', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify(sub)
+    });
+  }).then(function(r){
+    if(r && r.ok) console.log('Suscripción push registrada en el servidor.');
+  }).catch(function(e){
+    console.error('Error al suscribirse a push:', e);
+  });
+}
+
+function switchAsset(asset) {
+  activeAsset = asset;
+  document.getElementById('asset-btc').classList.toggle('active', asset==='BTC');
+  document.getElementById('asset-eth').classList.toggle('active', asset==='ETH');
+  document.getElementById('banner-asset').textContent = asset;
+  updatePriceUI();
+  evaluate(asset);
+}
+
+function showTab(name) {
+  document.querySelectorAll('.page').forEach(function(p){ p.classList.remove('active'); });
+  document.querySelectorAll('#tabs .tab').forEach(function(t){ t.classList.remove('active'); });
+  document.getElementById('page-'+name).classList.add('active');
+  var tabs = document.querySelectorAll('#tabs .tab');
+  var idx = name==='dashboard'?0:name==='filtros'?1:2;
+  tabs[idx].classList.add('active');
+}
+
+function calcEMA(prices, period) {
+  if (prices.length < period) return null;
+  var k = 2/(period+1), ema = 0;
+  for(var i=0;i<period;i++) ema += prices[i];
+  ema /= period;
+  for(var i=period;i<prices.length;i++) ema = prices[i]*k + ema*(1-k);
+  return ema;
+}
+function calcATR(candles, period) {
+  period = period||14;
+  if(candles.length < period+1) return null;
+  var trs = [];
+  for(var i=1;i<candles.length;i++){
+    var c=candles[i], p=candles[i-1];
+    trs.push(Math.max(c.high-c.low, Math.abs(c.high-p.close), Math.abs(c.low-p.close)));
+  }
+  var slice = trs.slice(-period);
+  return slice.reduce(function(a,b){return a+b;},0)/period;
+}
+function calcStdDev(arr) {
+  var mean = arr.reduce(function(a,b){return a+b;},0)/arr.length;
+  return Math.sqrt(arr.reduce(function(a,b){return a+Math.pow(b-mean,2);},0)/arr.length);
+}
+function calcSqueeze(candles) {
+  var P=20, BB=2.0, KC=1.5;
+  if(candles.length<P) return {sqz:false,momentum:0};
+  var sl = candles.slice(-P);
+  var closes=sl.map(function(c){return c.close;}),
+      highs=sl.map(function(c){return c.high;}),
+      lows=sl.map(function(c){return c.low;});
+  var mean=closes.reduce(function(a,b){return a+b;})/closes.length;
+  var std=calcStdDev(closes);
+  var trs=[];
+  for(var i=1;i<sl.length;i++) trs.push(Math.max(sl[i].high-sl[i].low,Math.abs(sl[i].high-sl[i-1].close),Math.abs(sl[i].low-sl[i-1].close)));
+  var atr=trs.reduce(function(a,b){return a+b;})/trs.length;
+  var sqz=(mean+BB*std)<(mean+KC*atr)&&(mean-BB*std)>(mean-KC*atr);
+  var maxH=Math.max.apply(null,highs), minL=Math.min.apply(null,lows);
+  var delta=closes[closes.length-1]-(maxH+minL)/2;
+  var ph=highs.slice(0,-1),pl=lows.slice(0,-1);
+  var prevDelta=closes[closes.length-2]-(Math.max.apply(null,ph)+Math.min.apply(null,pl))/2;
+  return {sqz:sqz, momentum:delta, rising:delta>prevDelta};
+}
+
+function fetchCandles() {
+  var base = 'https://api.binance.com/api/v3';
+  var parse = function(arr){ return arr.map(function(k){ return {open:+k[1],high:+k[2],low:+k[3],close:+k[4],time:k[0]}; }); };
+  Object.keys(ASSETS).forEach(function(key){
+    var a = ASSETS[key];
+    var sym = a.symbol.toUpperCase();
+    fetch(base+'/klines?symbol='+sym+'&interval=1h&limit=120')
+      .then(function(r){return r.json();})
+      .then(function(d){ a.candles1h=parse(d); evaluate(key); })
+      .catch(function(e){ console.error(e); });
+    fetch(base+'/klines?symbol='+sym+'&interval=15m&limit=100')
+      .then(function(r){return r.json();})
+      .then(function(d){ a.candles15m=parse(d); evaluate(key); })
+      .catch(function(e){ console.error(e); });
+  });
+}
+
+function connect() {
+  var streams = Object.keys(ASSETS).map(function(k){
+    var a = ASSETS[k];
+    return a.symbol+'@kline_15m/'+a.symbol+'@kline_1h/'+a.symbol+'@ticker';
+  }).join('/');
+  ws = new WebSocket('wss://stream.binance.com:9443/stream?streams='+streams);
+  ws.onopen = function(){ setConnected(true); };
+  ws.onclose = function(){ setConnected(false); setTimeout(connect,3000); };
+  ws.onerror = function(){ ws.close(); };
+  ws.onmessage = function(evt){
+    var msg=JSON.parse(evt.data), stream=msg.stream, data=msg.data;
+    var key = stream.indexOf('btc')===0 ? 'BTC' : 'ETH';
+    var a = ASSETS[key];
+    if(stream.indexOf('@ticker')>-1){
+      a.price=+data.c; a.priceChange=+data.P;
+      if(key===activeAsset) updatePriceUI();
+    }
+    if(stream.indexOf('@kline_1h')>-1 && data.k.x){
+      var k=data.k;
+      a.candles1h.push({open:+k.o,high:+k.h,low:+k.l,close:+k.c,time:k.t});
+      if(a.candles1h.length>120) a.candles1h.shift();
+      evaluate(key);
+    }
+    if(stream.indexOf('@kline_15m')>-1 && data.k.x){
+      var k=data.k;
+      a.candles15m.push({open:+k.o,high:+k.h,low:+k.l,close:+k.c,time:k.t});
+      if(a.candles15m.length>100) a.candles15m.shift();
+      evaluate(key);
+    }
+  };
+}
+
+function setConnected(ok) {
+  document.getElementById('dot').style.background = ok?'#00ff88':'#555';
+  document.getElementById('conn-text').textContent = ok?'En vivo':'Conectando...';
+}
+
+function updatePriceUI() {
+  var a = ASSETS[activeAsset];
+  if(a.price===null) return;
+  document.getElementById('price-val').textContent = '$'+a.price.toLocaleString('en-US',{minimumFractionDigits:2});
+  var chgEl = document.getElementById('price-chg');
+  chgEl.textContent = (a.priceChange>=0?'+':'')+a.priceChange.toFixed(2)+'% 24h';
+  chgEl.style.color = a.priceChange>=0?'#00ff88':'#ff3b5c';
+}
+
+function evaluate(assetKey) {
+  var a = ASSETS[assetKey];
+  if(!a.candles1h.length||!a.price) return;
+  var closes1h=a.candles1h.map(function(c){return c.close;});
+  var ema10=calcEMA(closes1h,10), ema55=calcEMA(closes1h,55);
+  if(!ema10||!ema55) return;
+  var trend=ema10>ema55?'BULL':'BEAR';
+
+  var rH=a.candles1h.slice(-20).map(function(c){return c.high;});
+  var rL=a.candles1h.slice(-20).map(function(c){return c.low;});
+  var nearSup=Math.abs(a.price-Math.min.apply(null,rL))/a.price<0.015;
+  var nearRes=Math.abs(a.price-Math.max.apply(null,rH))/a.price<0.015;
+  var nearE55=Math.abs(a.price-ema55)/a.price<0.012;
+
+  var ema10p=calcEMA(closes1h.slice(0,-5),10);
+  var ema55p=calcEMA(closes1h.slice(0,-5),55);
+  var slope=ema10p?Math.abs((ema10-ema10p)/ema10p)*100:0;
+  var crossUp=ema10p<ema55p&&ema10>=ema55;
+  var crossDown=ema10p>ema55p&&ema10<=ema55;
+
+  var sqz=calcSqueeze(a.candles15m);
+  var lastC=a.candles15m[a.candles15m.length-1];
+  var bullC=lastC&&lastC.close>lastC.open;
+  var bodyPct=lastC?Math.abs(lastC.close-lastC.open)/lastC.open*100:0;
+
+  var filters=[
+    {label:'Estructura del Mercado', pass:true, value:trend==='BULL'?'ALCISTA ▲':'BAJISTA ▼', bullish:trend==='BULL'},
+    {label:'Ubicación del Precio', pass:nearSup||nearRes||nearE55, value:nearSup?'Cerca Soporte':nearRes?'Cerca Resistencia':nearE55?'Cerca EMA55':'Zona Neutral', bullish:nearSup||(nearE55&&trend==='BULL')},
+    {label:'EMA 10 y EMA 55', pass:(a.price>ema10&&a.price>ema55)||(a.price<ema10&&a.price<ema55), value:'EMA10:'+Math.round(ema10)+' | EMA55:'+Math.round(ema55), bullish:a.price>ema10&&a.price>ema55},
+    {label:'Cruce de Medias Móviles', pass:true, value:crossUp?'Cruce Alcista ↑':crossDown?'Cruce Bajista ↓':'Sin cruce reciente', bullish:crossUp||(!crossDown&&trend==='BULL')},
+    {label:'Fuerza de Tendencia', pass:slope>0.3, value:'Slope: '+slope.toFixed(2)+'%', bullish:ema10>ema10p},
+    {label:'Squeeze Momentum', pass:!sqz.sqz&&Math.abs(sqz.momentum)>10, value:sqz.sqz?'EN SQUEEZE':'Momentum: '+(sqz.momentum>0?'▲ VERDE':'▼ ROJO'), bullish:sqz.momentum>0},
+    {label:'Vela de Confirmación', pass:bodyPct>0.1, value:(bullC?'Alcista':'Bajista')+' ('+bodyPct.toFixed(2)+'%)', bullish:bullC},
+  ];
+
+  var bullScore=filters.filter(function(f){return f.pass&&f.bullish;}).length;
+  var bearScore=filters.filter(function(f){return f.pass&&!f.bullish;}).length;
+  var newSignal=null;
+  if(bullScore>=MIN_FILTERS) newSignal='BUY';
+  else if(bearScore>=MIN_FILTERS) newSignal='SELL';
+
+  if(assetKey===activeAsset){
+    updateDashboard(filters, bullScore, bearScore, newSignal);
+  }
+
+  if(newSignal && newSignal!==a.alertSentSignal){
+    a.alertSentSignal=newSignal;
+    var atr=calcATR(a.candles1h,14)||a.price*0.01;
+    var entry=a.price, sl, tp1, tp2, tp3;
+    if(newSignal==='BUY'){
+      sl=entry-atr*SL_MULT; tp1=entry+atr*1.5; tp2=entry+atr*3; tp3=entry+atr*5;
+    } else {
+      sl=entry+atr*SL_MULT; tp1=entry-atr*1.5; tp2=entry-atr*3; tp3=entry-atr*5;
+    }
+    var score=newSignal==='BUY'?bullScore:bearScore;
+    var t=new Date().toLocaleTimeString();
+    var msg=(newSignal==='BUY'?'COMPRA':'VENTA')+' '+assetKey+' — '+score+'/7 filtros @ $'+Math.round(a.price).toLocaleString()+' | SL: $'+Math.round(sl).toLocaleString()+' | TP1: $'+Math.round(tp1).toLocaleString();
+    if(assetKey===activeAsset) showTpsl(newSignal, entry, sl, tp1, tp2, tp3, atr, t);
+    addAlert({time:t, msg:msg, type:newSignal, asset:assetKey, entry:entry, sl:sl, tp1:tp1, tp2:tp2, tp3:tp3});
+    // Nota: la notificación push real ya NO se dispara aquí — la envía
+    // netlify/functions/check-signals.js desde el servidor cada 15 min,
+    // así llega aunque el celular esté bloqueado o el navegador cerrado.
+    // Esta vista solo actualiza el historial mientras la pestaña está abierta.
+  } else if(!newSignal && assetKey===activeAsset){
+    a.alertSentSignal=null;
+  }
+}
+
+function updateDashboard(filters, bullScore, bearScore, signal) {
+  var banner=document.getElementById('banner');
+  var lbl=document.getElementById('signal-label');
+  var sub=document.getElementById('signal-sub');
+  if(signal==='BUY'){
+    banner.style.background='rgba(0,255,136,0.12)'; banner.style.borderColor='#00ff88';
+    lbl.textContent='COMPRA'; lbl.style.color='#00ff88';
+    sub.textContent=bullScore+'/7 filtros confirmados';
+  } else if(signal==='SELL'){
+    banner.style.background='rgba(255,59,92,0.12)'; banner.style.borderColor='#ff3b5c';
+    lbl.textContent='VENTA'; lbl.style.color='#ff3b5c';
+    sub.textContent=bearScore+'/7 filtros confirmados';
+  } else {
+    banner.style.background='rgba(255,255,255,0.04)'; banner.style.borderColor='#222';
+    lbl.textContent='SIN SEÑAL'; lbl.style.color='#444';
+    sub.textContent='Mínimo '+MIN_FILTERS+'/7 para señal';
+    document.getElementById('tpsl-card').style.display='none';
+  }
+
+  document.getElementById('bull-count').textContent=bullScore;
+  document.getElementById('bear-count').textContent=bearScore;
+  var bb=document.getElementById('bull-bar'), bbar=document.getElementById('bear-bar');
+  bb.innerHTML=''; bbar.innerHTML='';
+  for(var i=0;i<7;i++){
+    var d1=document.createElement('div'); d1.className='score-dot';
+    if(i<bullScore) d1.style.background='#00ff88';
+    bb.appendChild(d1);
+    var d2=document.createElement('div'); d2.className='score-dot';
+    if(i<bearScore) d2.style.background='#ff3b5c';
+    bbar.appendChild(d2);
+  }
+
+  var fl=document.getElementById('filters-list'); fl.innerHTML='';
+  filters.forEach(function(f,i){
+    var card=document.createElement('div');
+    card.className='filter-card'+(f.pass?(f.bullish?' bull':' bear'):'');
+    var ico=f.pass?(f.bullish?'OK':'NO'):'--';
+    var numCls='filter-num'+(f.pass?(f.bullish?' bull':' bear'):'');
+    card.innerHTML='<div style="display:flex;align-items:center;gap:10px"><div class="'+numCls+'">'+(i+1)+'</div><div><div class="filter-label">'+f.label+'</div><div class="filter-value">'+f.value+'</div></div></div><div class="filter-ico">'+ico+'</div>';
+    fl.appendChild(card);
+  });
+}
+
+function showTpsl(side, entry, sl, tp1, tp2, tp3, atr, time) {
+  var card=document.getElementById('tpsl-card');
+  card.style.display='block';
+  document.getElementById('tpsl-title').textContent='Niveles ('+( side==='BUY'?'Long':'Short')+') — ATR×'+SL_MULT;
+  document.getElementById('tpsl-entry').textContent='$'+Math.round(entry).toLocaleString();
+  document.getElementById('tpsl-tp1').textContent='$'+Math.round(tp1).toLocaleString();
+  document.getElementById('tpsl-tp2').textContent='$'+Math.round(tp2).toLocaleString();
+  document.getElementById('tpsl-tp3').textContent='$'+Math.round(tp3).toLocaleString();
+  document.getElementById('tpsl-sl').textContent='$'+Math.round(sl).toLocaleString();
+  document.getElementById('tpsl-meta').textContent='Señal a las '+time+' · ATR(14): $'+Math.round(atr);
+}
+
+function addAlert(a) {
+  alerts.unshift(a);
+  if(alerts.length>20) alerts.pop();
+  renderAlerts();
+}
+
+function renderAlerts() {
+  var list=document.getElementById('alert-list');
+  if(alerts.length===0){ list.innerHTML='<div id="no-alerts">Sin señales aún. Monitoreando BTC y ETH...</div>'; return; }
+  list.innerHTML='';
+  alerts.forEach(function(a){
+    var div=document.createElement('div');
+    div.className='alert-item '+(a.type==='BUY'?'buy':'sell');
+    div.innerHTML='<div class="alert-time"><span class="asset-badge '+a.asset+'">'+a.asset+'</span>'+a.time+'</div><div>'+a.msg+'</div>'
+      +'<div class="alert-levels">'
+      +'<span>Entrada: $'+Math.round(a.entry).toLocaleString()+'</span>'
+      +'<span style="color:#ff3b5c">SL: $'+Math.round(a.sl).toLocaleString()+'</span>'
+      +'<span style="color:#00ff88">TP1: $'+Math.round(a.tp1).toLocaleString()+'</span>'
+      +'<span style="color:#00ff88">TP2: $'+Math.round(a.tp2).toLocaleString()+'</span>'
+      +'<span style="color:#00ff88">TP3: $'+Math.round(a.tp3).toLocaleString()+'</span>'
+      +'</div>';
+    list.appendChild(div);
+  });
+}
+
+function requestNotif() {
+  if(!('Notification' in window)){ alert('Tu navegador no soporta notificaciones'); return; }
+  Notification.requestPermission().then(function(p){
+    if(p==='granted'){
+      document.getElementById('notif-btn').style.display='none';
+      document.getElementById('notif-ok').style.display='block';
+      subscribeUserToPush();
+    }
+    else if(p==='denied'){ alert('Notificaciones bloqueadas. Ve a Ajustes del sitio en Chrome y permite notificaciones manualmente.'); }
+  });
+}
+function checkNotifState() {
+  if(!('Notification' in window)) return;
+  if(Notification.permission==='granted'){
+    document.getElementById('notif-btn').style.display='none';
+    document.getElementById('notif-ok').style.display='block';
+    subscribeUserToPush();
+  }
+}
+
+// FIX: Chrome para Android no permite "new Notification()" desde la página
+// (lanza "Illegal constructor" y corta la ejecución en silencio).
+// Hay que pasar siempre por el Service Worker con showNotification().
+
+function testNotif() {
+  if(!('Notification' in window) || !('serviceWorker' in navigator)){
+    alert('Tu navegador no soporta notificaciones');
+    return;
+  }
+  if(Notification.permission!=='granted'){
+    alert('Primero activa las notificaciones con el botón de arriba');
+    return;
+  }
+  navigator.serviceWorker.ready.then(function(reg){
+    return reg.showNotification('JAEM — Prueba de notificación', {
+      body: 'Si ves esto, las notificaciones están funcionando correctamente en tu celular.',
+      icon: 'icon-192.png',
+      badge: 'icon-192.png'
+    });
+  }).then(function(){
+    alert('Notificación de prueba enviada. Revisa la barra de notificaciones de tu celular.');
+  }).catch(function(e){
+    console.error(e);
+    alert('No se pudo enviar la notificación. Revisa que el Service Worker se haya registrado (recarga la página) y vuelve a intentar.');
+  });
+}
+
+var filterInfos=[
+  {num:1,name:'Estructura del Mercado',desc:'Identifica si la tendencia principal es alcista o bajista usando EMA10 vs EMA55 en 1H.',tip:'Busca solo compras en tendencia alcista, ventas en bajista.'},
+  {num:2,name:'Ubicación del Precio',desc:'El precio debe estar cerca de zonas de soporte, resistencia o EMA55 (±1.2%).',tip:'No entres en zonas neutrales sin S/R definido.'},
+  {num:3,name:'EMA 10 y EMA 55',desc:'Precio encima de ambas EMAs = alcista. Precio debajo = bajista.',tip:'La dirección del precio respecto a las EMAs confirma la tendencia.'},
+  {num:4,name:'Cruce de Medias Móviles',desc:'Cruce EMA10/EMA55 = señal temprana de cambio o continuación.',tip:'El cruce reciente en las últimas 5 velas 1H es más relevante.'},
+  {num:5,name:'Fuerza de Tendencia',desc:'Se usa la pendiente del EMA10 como proxy del ADX. Slope > 0.3% = tendencia fuerte.',tip:'Evita entradas cuando la tendencia sea plana.'},
+  {num:6,name:'Squeeze Momentum',desc:'Barras verdes = impulso alcista, rojas = bajista. Sin squeeze activo = movimiento válido.',tip:'No entres durante squeeze; espera la expansión.'},
+  {num:7,name:'Vela de Confirmación',desc:'La última vela de 15m debe cerrar en la dirección esperada con cuerpo > 0.1%.',tip:'Una vela macho/martillo que cierra respetando el nivel es la entrada.'},
+];
+function buildFilterInfo(){
+  var list=document.getElementById('filter-info-list');
+  filterInfos.forEach(function(f){
+    var div=document.createElement('div'); div.className='filter-info-card';
+    div.innerHTML='<div style="margin-bottom:8px"><span class="filter-info-num">'+f.num+'</span><span class="filter-info-name">'+f.name+'</span></div>'
+      +'<div class="filter-info-desc">'+f.desc+'</div>'
+      +'<div class="filter-info-tip">'+f.tip+'</div>';
+    list.appendChild(div);
+  });
+}
+
+checkNotifState();
+buildFilterInfo();
+fetchCandles();
+connect();
+setInterval(fetchCandles, 300000);
+</script>
+</body>
+</html>
