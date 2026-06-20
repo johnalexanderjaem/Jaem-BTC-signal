@@ -17,7 +17,7 @@ if (VAPID_PUBLIC_KEY && VAPID_PRIVATE_KEY) {
 const ASSETS = { BTC: "BTCUSDT", ETH: "ETHUSDT" };
 const MIN_FILTERS = 5;
 const SL_MULT = 1.5;
-const BINANCE_BASE = "https://api.binance.com/api/v3";
+const BINANCE_BASE = "https://data-api.binance.vision/api/v3";
 
 // ---------- Mismas funciones matemáticas que el cliente (index.html) ----------
 
